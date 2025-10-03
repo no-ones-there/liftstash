@@ -2,6 +2,8 @@
 
 **A powerful, self-hostable fitness companion for serious strength training enthusiasts**
 
+>Note: This is heavily AI driven development, I just needed an application to suit my usecase. As such, your mileage may vary.
+
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)](https://docker.com)
 [![Mobile](https://img.shields.io/badge/Mobile-Optimized-green?logo=mobile)](https://github.com)
 [![Dark Mode](https://img.shields.io/badge/Dark%20Mode-Supported-purple)](https://github.com)
