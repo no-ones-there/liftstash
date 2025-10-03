@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  liftstash:
+    image: workout-tracker
+    ports:
+      - "80:80"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - SECRET_KEY=your-secret-key-here
+      - DATABASE=/app/data/workout_tracker.db
+    restart: unless-stopped

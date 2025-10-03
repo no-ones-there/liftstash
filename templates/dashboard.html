@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Welcome, {{ session.username }}!</h2>
+<div class="dashboard-grid">
+    <div class="card">
+        <h3>Quick Actions</h3>
+        <a href="/new_workout" class="btn">Start Workout</a>
+        <a href="/workouts" class="btn">View Workouts</a>
+    </div>
+    <div class="card">
+        <h3>Manage</h3>
+        <a href="/exercises" class="btn">Exercises</a>
+        <a href="/programs" class="btn">Programs</a>
+        <a href="/prs" class="btn">Personal Records</a>
+    </div>
+</div>
+{% endblock %}

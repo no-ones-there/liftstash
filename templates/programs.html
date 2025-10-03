@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="header-actions">
+    <h2>Programs</h2>
+    <a href="/new_program" class="btn">New Program</a>
+</div>
+<div class="program-list">
+    {% for item in programs_data %}
+    <div class="program-item">
+        <div class="program-info">
+            <h3>{{ item.program.name }}</h3>
+            {% if item.program.description %}<p>{{ item.program.description }}</p>{% endif %}
+            <div class="exercise-tags">
+                {% for exercise in item.exercises %}
+                <span class="exercise-tag">{{ exercise }}</span>
+                {% endfor %}
+            </div>
+            <small>Created: {{ item.program.created_at }}</small>
+        </div>
+        <div class="program-actions">
+            <a href="/edit_program/{{ item.program.id }}" class="btn-small">Edit</a>
+            <form method="post" action="/delete_program/{{ item.program.id }}" style="display:inline" onsubmit="return confirm('Delete this program?')">
+                <button type="submit" class="btn-small btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

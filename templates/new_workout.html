@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>New Workout</h2>
+<form method="post" class="form-container">
+    <select name="program_id" required>
+        <option value="">Select Program</option>
+        {% for program in programs %}
+        <option value="{{ program.id }}">{{ program.name }}</option>
+        {% endfor %}
+    </select>
+    <input type="date" name="date" value="{{ today }}" required>
+    <textarea name="notes" placeholder="Notes (optional)"></textarea>
+    <button type="submit">Start Workout</button>
+</form>
+{% endblock %}

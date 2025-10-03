@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Exercise History</h2>
+
+<div class="history-controls">
+    <select id="exercise-select" multiple>
+        {% for exercise in exercises %}
+        <option value="{{ exercise.id }}">{{ exercise.name }}</option>
+        {% endfor %}
+    </select>
+    <button onclick="updateChart()">Update Chart</button>
+</div>
+
+<div class="chart-container">
+    <canvas id="historyChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script>
+const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e', '#e67e22'];
+let chart = null;
+
+async function updateChart() {
+    const select = document.getElementById('exercise-select');
+    const selectedIds = Array.from(select.selectedOptions).map(option => option.value);
+    
+    if (selectedIds.length === 0) {
+        if (chart) chart.destroy();
+        return;
+    }
+    
+    const params = new URLSearchParams();
+    selectedIds.forEach(id => params.append('exercise_ids', id));
+    const response = await fetch('/api/exercise_history?' + params.toString());
+    const data = await response.json();
+    
+    const datasets = data.map((exercise, index) => ({
+        label: exercise.exercise_name,
+        data: exercise.data.map(point => ({
+            x: point.date,
+            y: point.weight
+        })),
+        borderColor: colors[index % colors.length],
+        backgroundColor: colors[index % colors.length] + '20',
+        fill: false,
+        tension: 0.1
+    }));
+    
+    if (chart) chart.destroy();
+    
+    const ctx = document.getElementById('historyChart').getContext('2d');
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day'
+                    },
+
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Weight (kg)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            }
+        }
+    });
+}
+
+// Initialize empty chart
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('historyChart').getContext('2d');
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: { datasets: [] },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

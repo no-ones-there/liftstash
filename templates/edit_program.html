@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Program</h2>
+<form method="post" class="form-container">
+    <input type="text" name="name" value="{{ program.name }}" placeholder="Program Name" required>
+    <textarea name="description" placeholder="Description">{{ program.description or '' }}</textarea>
+    
+    <h3>Exercises</h3>
+    <div id="exercises-container">
+        {% for pe in program_exercises %}
+        <div class="exercise-row">
+            <select name="exercise_ids" required>
+                <option value="">Select Exercise</option>
+                {% for exercise in exercises %}
+                <option value="{{ exercise.id }}" {% if exercise.id == pe.exercise_id %}selected{% endif %}>{{ exercise.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="number" name="target_sets" value="{{ pe.target_sets }}" placeholder="Sets" min="1" required>
+            <input type="number" name="target_reps" value="{{ pe.target_reps }}" placeholder="Reps" min="1" required>
+            <button type="button" onclick="removeExercise(this)">Remove</button>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="form-actions">
+        <button type="button" onclick="addExercise()">Add Exercise</button>
+        <button type="submit">Save Program</button>
+        <a href="/programs" class="btn">Cancel</a>
+    </div>
+</form>
+
+<script>
+const exerciseOptions = `
+    <option value="">Select Exercise</option>
+    {% for exercise in exercises %}
+    <option value="{{ exercise.id }}">{{ exercise.name }}</option>
+    {% endfor %}
+`;
+
+function addExercise() {
+    const container = document.getElementById('exercises-container');
+    const div = document.createElement('div');
+    div.className = 'exercise-row';
+    div.innerHTML = `
+        <select name="exercise_ids" required>
+            ${exerciseOptions}
+        </select>
+        <input type="number" name="target_sets" value="3" placeholder="Sets" min="1" required>
+        <input type="number" name="target_reps" value="10" placeholder="Reps" min="1" required>
+        <button type="button" onclick="removeExercise(this)">Remove</button>
+    `;
+    container.appendChild(div);
+}
+
+function removeExercise(button) {
+    button.parentElement.remove();
+}
+</script>
+{% endblock %}

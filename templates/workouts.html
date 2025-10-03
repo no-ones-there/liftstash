@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="header-actions">
+    <h2>Workouts</h2>
+    <a href="/new_workout" class="btn">Start Workout</a>
+</div>
+<div class="workout-list">
+    {% for workout in workouts %}
+    <div class="workout-item">
+        <div class="workout-info">
+            <h3><a href="/workout/{{ workout.id }}">{{ workout.program_name }}</a></h3>
+            <p>{{ workout.date }}</p>
+            {% if workout.notes %}<p class="notes">{{ workout.notes }}</p>{% endif %}
+        </div>
+        <div class="workout-actions">
+            <a href="/edit_workout/{{ workout.id }}" class="btn-small">Edit</a>
+            <form method="post" action="/delete_workout/{{ workout.id }}" style="display:inline" onsubmit="return confirm('Delete this workout?')">
+                <button type="submit" class="btn-small btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Personal Records</h2>
+<div class="pr-list">
+    {% set current_exercise = '' %}
+    {% for pr in prs %}
+        {% if pr.exercise_name != current_exercise %}
+            {% set current_exercise = pr.exercise_name %}
+            <h3>{{ pr.exercise_name }} {% if pr.improvement_direction == 'decrease' %}<span class="assisted-tag">Assisted</span>{% endif %}</h3>
+        {% endif %}
+        <div class="pr-item">
+            {{ pr.best_weight }}kg × {{ pr.reps }} reps <small>({{ pr.date }})</small>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

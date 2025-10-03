@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Exercises</h2>
+<form method="post" action="/add_exercise" class="form-container">
+    <input type="text" name="name" placeholder="Exercise Name" required>
+    <input type="text" name="muscle_group" placeholder="Muscle Group">
+    <select name="improvement_direction">
+        <option value="increase">Higher weight = better</option>
+        <option value="decrease">Lower weight = better (assisted)</option>
+    </select>
+    <label><input type="checkbox" name="split_tracking"> Track left/right separately</label>
+    <button type="submit">Add Exercise</button>
+</form>
+
+<div class="exercise-list">
+    {% for exercise in exercises %}
+    <div class="exercise-item">
+        <div class="exercise-info">
+            <strong>{{ exercise.name }}</strong>
+            {% if exercise.muscle_group %}<span class="muscle-group">{{ exercise.muscle_group }}</span>{% endif %}
+            {% if exercise.improvement_direction == 'decrease' %}<span class="assisted-tag">Assisted</span>{% endif %}
+            {% if exercise.split_tracking %}<span class="split-tag">L/R Split</span>{% endif %}
+        </div>
+        {% if exercise.user_id %}
+        <div class="exercise-actions">
+            <button onclick="editExercise({{ exercise.id }}, '{{ exercise.name }}', '{{ exercise.muscle_group or '' }}', '{{ exercise.improvement_direction }}', {{ exercise.split_tracking or 0 }})">Edit</button>
+            <form method="post" action="/delete_exercise/{{ exercise.id }}" style="display:inline" onsubmit="return confirm('Delete this exercise?')">
+                <button type="submit">Delete</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<div id="editModal" class="modal" style="display:none">
+    <div class="modal-content">
+        <h3>Edit Exercise</h3>
+        <form id="editForm" method="post">
+            <input type="text" id="editName" name="name" placeholder="Exercise Name" required>
+            <input type="text" id="editMuscleGroup" name="muscle_group" placeholder="Muscle Group">
+            <select id="editDirection" name="improvement_direction">
+                <option value="increase">Higher weight = better</option>
+                <option value="decrease">Lower weight = better (assisted)</option>
+            </select>
+            <label><input type="checkbox" id="editSplitTracking" name="split_tracking"> Track left/right separately</label>
+            <div class="modal-actions">
+                <button type="submit">Save</button>
+                <button type="button" onclick="closeModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function editExercise(id, name, muscleGroup, direction, splitTracking) {
+    document.getElementById('editName').value = name;
+    document.getElementById('editMuscleGroup').value = muscleGroup;
+    document.getElementById('editDirection').value = direction;
+    document.getElementById('editSplitTracking').checked = splitTracking;
+    document.getElementById('editForm').action = '/edit_exercise/' + id;
+    document.getElementById('editModal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+</script>
+{% endblock %}

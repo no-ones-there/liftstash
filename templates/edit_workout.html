@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Workout</h2>
+<form method="post" class="form-container">
+    <label for="date">Date:</label>
+    <input type="date" name="date" value="{{ workout.date }}" required>
+    
+    <label for="notes">Notes:</label>
+    <textarea name="notes" placeholder="Workout notes">{{ workout.notes or '' }}</textarea>
+    
+    <div class="form-actions">
+        <button type="submit">Save Changes</button>
+        <a href="/workout/{{ workout.id }}" class="btn">Cancel</a>
+    </div>
+</form>
+{% endblock %}

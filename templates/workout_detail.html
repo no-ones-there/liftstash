@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="workout-header">
+    <div>
+        <h2>{{ workout.program_name }}</h2>
+        <p>{{ workout.date }}</p>
+        {% if workout.notes %}<p class="notes">{{ workout.notes }}</p>{% endif %}
+    </div>
+    <div class="workout-actions">
+        <a href="/edit_workout/{{ workout.id }}" class="btn-small">Edit Workout</a>
+    </div>
+</div>
+
+<div class="program-exercises">
+    <h3>Program Exercises</h3>
+    {% for exercise in program_exercises %}
+    <div class="exercise-section">
+        <h4>{{ exercise.name }} <span class="target-info">({{ exercise.target_sets }} sets × {{ exercise.target_reps }} reps)</span></h4>
+        {% if exercise.split_tracking %}
+        <div class="split-exercise">
+            <div class="side-section">
+                <h5>Left</h5>
+                <div class="add-set-form">
+                    <input type="number" id="weight-{{ exercise.id }}-left" placeholder="Weight" step="0.5">
+                    <input type="number" id="reps-{{ exercise.id }}-left" placeholder="Reps" value="{{ exercise.target_reps }}">
+                    <button onclick="addSet({{ exercise.id }}, 'left')">Add Set</button>
+                </div>
+                <div class="sets-list">
+                    {% for set in sets %}
+                        {% if set.exercise_id == exercise.id and set.side == 'left' %}
+                        <div class="set-item">
+                            <span>Set {{ set.set_number }}: {{ set.weight }}kg × {{ set.reps }} reps</span>
+                            <button onclick="deleteSet({{ set.id }})" class="btn-small btn-danger">Delete</button>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="side-section">
+                <h5>Right</h5>
+                <div class="add-set-form">
+                    <input type="number" id="weight-{{ exercise.id }}-right" placeholder="Weight" step="0.5">
+                    <input type="number" id="reps-{{ exercise.id }}-right" placeholder="Reps" value="{{ exercise.target_reps }}">
+                    <button onclick="addSet({{ exercise.id }}, 'right')">Add Set</button>
+                </div>
+                <div class="sets-list">
+                    {% for set in sets %}
+                        {% if set.exercise_id == exercise.id and set.side == 'right' %}
+                        <div class="set-item">
+                            <span>Set {{ set.set_number }}: {{ set.weight }}kg × {{ set.reps }} reps</span>
+                            <button onclick="deleteSet({{ set.id }})" class="btn-small btn-danger">Delete</button>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="add-set-form">
+            <input type="number" id="weight-{{ exercise.id }}" placeholder="Weight" step="0.5">
+            <input type="number" id="reps-{{ exercise.id }}" placeholder="Reps" value="{{ exercise.target_reps }}">
+            <button onclick="addSet({{ exercise.id }})">Add Set</button>
+        </div>
+        <div class="sets-list">
+            {% for set in sets %}
+                {% if set.exercise_id == exercise.id and not set.side %}
+                <div class="set-item">
+                    <span>Set {{ set.set_number }}: {{ set.weight }}kg × {{ set.reps }} reps</span>
+                    <button onclick="deleteSet({{ set.id }})" class="btn-small btn-danger">Delete</button>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+const workoutId = {{ workout.id }};
+
+async function addSet(exerciseId, side = null) {
+    const weightId = side ? `weight-${exerciseId}-${side}` : `weight-${exerciseId}`;
+    const repsId = side ? `reps-${exerciseId}-${side}` : `reps-${exerciseId}`;
+    
+    const weight = document.getElementById(weightId).value;
+    const reps = document.getElementById(repsId).value;
+    
+    if (!weight || !reps) return;
+    
+    const payload = {
+        workout_id: workoutId, 
+        exercise_id: exerciseId, 
+        weight: parseFloat(weight), 
+        reps: parseInt(reps)
+    };
+    
+    if (side) payload.side = side;
+    
+    await fetch('/add_set', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    });
+    
+    location.reload();
+}
+
+async function deleteSet(setId) {
+    if (!confirm('Delete this set?')) return;
+    
+    await fetch(`/delete_set/${setId}`, {
+        method: 'POST'
+    });
+    
+    location.reload();
+}
+</script>
+{% endblock %}

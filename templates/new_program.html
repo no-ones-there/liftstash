@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>New Program</h2>
+<form method="post" class="form-container">
+    <input type="text" name="name" placeholder="Program Name" required>
+    <textarea name="description" placeholder="Description (optional)"></textarea>
+    
+    <h3>Exercises</h3>
+    <div id="exercise-list">
+        <div class="exercise-row">
+            <select name="exercise_ids">
+                <option value="">Select Exercise</option>
+                {% for exercise in exercises %}
+                <option value="{{ exercise.id }}">{{ exercise.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="number" name="target_sets" placeholder="Sets" min="1" value="3" class="sets-input">
+            <input type="number" name="target_reps" placeholder="Reps" min="1" value="10" class="reps-input">
+            <button type="button" onclick="showNewExerciseForm(this)">+</button>
+        </div>
+    </div>
+    <button type="button" onclick="addExercise()">Add Exercise</button>
+    
+    <button type="submit">Create Program</button>
+</form>
+
+<!-- New Exercise Modal -->
+<div id="exercise-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Create New Exercise</h3>
+        <input type="text" id="new-exercise-name" placeholder="Exercise Name" required>
+        <input type="text" id="new-exercise-muscle" placeholder="Muscle Group">
+        <select id="new-exercise-direction">
+            <option value="increase">Higher weight = better</option>
+            <option value="decrease">Lower weight = better (assisted)</option>
+        </select>
+        <div class="modal-buttons">
+            <button type="button" onclick="createExercise()">Create</button>
+            <button type="button" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentSelect = null;
+
+function addExercise() {
+    const list = document.getElementById('exercise-list');
+    const row = document.createElement('div');
+    row.className = 'exercise-row';
+    row.innerHTML = `
+        <select name="exercise_ids">
+            <option value="">Select Exercise</option>
+            {% for exercise in exercises %}
+            <option value="{{ exercise.id }}">{{ exercise.name }}</option>
+            {% endfor %}
+        </select>
+        <input type="number" name="target_sets" placeholder="Sets" min="1" value="3" class="sets-input">
+        <input type="number" name="target_reps" placeholder="Reps" min="1" value="10" class="reps-input">
+        <button type="button" onclick="showNewExerciseForm(this)">+</button>
+    `;
+    list.appendChild(row);
+}
+
+function showNewExerciseForm(button) {
+    currentSelect = button.parentElement.querySelector('select');
+    document.getElementById('exercise-modal').style.display = 'block';
+    document.getElementById('new-exercise-name').focus();
+}
+
+function closeModal() {
+    document.getElementById('exercise-modal').style.display = 'none';
+    document.getElementById('new-exercise-name').value = '';
+    document.getElementById('new-exercise-muscle').value = '';
+    document.getElementById('new-exercise-direction').value = 'increase';
+}
+
+async function createExercise() {
+    const name = document.getElementById('new-exercise-name').value;
+    const muscle = document.getElementById('new-exercise-muscle').value;
+    const direction = document.getElementById('new-exercise-direction').value;
+    
+    if (!name) return;
+    
+    try {
+        const response = await fetch('/api/create_exercise', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, muscle_group: muscle, improvement_direction: direction})
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            // Add new exercise to all select dropdowns
+            const option = new Option(name, result.exercise_id);
+            document.querySelectorAll('select[name="exercise_ids"]').forEach(select => {
+                select.add(option.cloneNode(true));
+            });
+            
+            // Select the new exercise in the current dropdown
+            currentSelect.value = result.exercise_id;
+            closeModal();
+        }
+    } catch (error) {
+        alert('Error creating exercise');
+    }
+}
+</script>
+{% endblock %}
